@@ -12,12 +12,29 @@
   
     // Function to check if a player should be eliminated
     function checkElimination() {
-      const playerId = $hotPotatoStore.PotatoHolder;
-      const playerName = $hotPotatoStore.players[playerId];
+      const roundsLeft = $hotPotatoStore.roundsLeft;
+      const playersLeft = Object.keys($hotPotatoStore.players).map(Number);
   
-      if ($hotPotatoStore.roundsLeft === 0) {
+      // Check if there's more than one player left
+      if (playersLeft.length > 1) {
+        // Choose a random player from the remaining players
+        const randomIndex = Math.floor(Math.random() * playersLeft.length);
+        const playerId = playersLeft[randomIndex];
+        const playerName = $hotPotatoStore.players[playerId];
+  
+        // Eliminate the player
         eliminatePlayer(playerId);
-        eliminated = `${playerName} ... and was eliminated!`;
+  
+        eliminated = `${playerName} ... and has been eliminated!`;
+  
+        // Update the rounds left
+        hotPotatoStore.update((state) => ({
+          ...state,
+          roundsLeft: state.roundsLeft - 1,
+        }));
+      } else {
+        // If there's only one player left, declare them as the winner
+        winner = $hotPotatoStore.players[playersLeft[0]];
       }
     }
   </script>
@@ -28,12 +45,13 @@
       {#each Object.entries($hotPotatoStore.players) as [playerId, playerName]}
         {#if +playerId === $hotPotatoStore.PotatoHolder}
           <h2>{playerName}</h2>
-          <h3>is holding potato</h3>
+          {#if eliminated === playerName}
+            <h3>... and has been eliminated!</h3>
+          {:else}
+            <h3>is holding potato</h3>
+          {/if}
         {:else}
           <h2>{playerName}</h2>
-        {/if}
-        {#if eliminated === playerName}
-          <h3>... and was eliminated!</h3>
         {/if}
       {/each}
       <button on:click={handlePassPotato}>Pass the Potato</button>
@@ -49,6 +67,5 @@
   </main>
   
   <style>
-    /* Add your CSS styles here */
   </style>
   
