@@ -28,37 +28,41 @@ const INITIAL_STATE: HotPotatoState = {
 	eliminatedPlayer: null
 };
 
-const hotPotatoStore = writable<HotPotatoState>(INITIAL_STATE);
+function createhotPotatoStore() {
+	const { set, update, subscribe } = writable<HotPotatoState>(INITIAL_STATE);
 
-function startGame() {
-	hotPotatoStore.set({ ...INITIAL_STATE, playing: true });
+	function startGame() {
+		update((state) => {
+			return { ...state, playing: true };
+		});
+	}
+
+	function passPotato() {
+		update((state) => {
+			const newPotatoHolder = getRandomBetween0To4();
+			const roundsLeft = state.roundsLeft - 1;
+			return { ...state, PotatoHolder: newPotatoHolder, roundsLeft };
+		});
+	}
+
+	function eliminatePlayer(playerId: number) {
+		update((state) => {
+			const eliminatedPlayer = state.players[playerId];
+			const updatedPlayers = { ...state.players };
+			delete updatedPlayers[playerId];
+			return {
+				...state,
+				players: updatedPlayers,
+				eliminatedPlayer
+			};
+		});
+	}
+
+	function endGame(winner: string) {
+		update((state) => {
+			return { ...state, playing: false, winner };
+		});
+	}
+	return { update, set, subscribe, startGame, passPotato, eliminatePlayer, endGame };
 }
-
-function passPotato() {
-	hotPotatoStore.update((state) => {
-		const newPotatoHolder = getRandomBetween0To4();
-		const roundsLeft = state.roundsLeft - 1;
-		return { ...state, PotatoHolder: newPotatoHolder, roundsLeft };
-	});
-}
-
-function eliminatePlayer(playerId: number) {
-	hotPotatoStore.update((state) => {
-		const eliminatedPlayer = state.players[playerId];
-		const updatedPlayers = { ...state.players };
-		delete updatedPlayers[playerId];
-		return {
-			...state,
-			players: updatedPlayers,
-			eliminatedPlayer
-		};
-	});
-}
-
-function endGame(winner: string) {
-	hotPotatoStore.update((state) => {
-		return { ...state, playing: false, winner };
-	});
-}
-
-export { hotPotatoStore, startGame, passPotato, eliminatePlayer, endGame };
+export const hotPotatoStore = createhotPotatoStore();

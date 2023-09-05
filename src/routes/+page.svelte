@@ -1,5 +1,5 @@
 <script lang="ts">
-  import HotPotato from '$lib/components/HotPotato.svelte';
+	import HotPotato from '$lib/components/HotPotato.svelte';
 </script>
 
 <HotPotato />
